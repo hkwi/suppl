@@ -1,5 +1,10 @@
 package syscall
 
+const (
+	IFF_LOWER_UP = 1<<16
+	IFF_DORMANT = 1<<17
+)
+
 // htons(syscall.ETH_P_ALL)
 const ETH_P_ALL uint16 = 0x0300
 
