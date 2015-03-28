@@ -1,10 +1,10 @@
 package layers
 
 import (
-	"code.google.com/p/gopacket"
-	"code.google.com/p/gopacket/layers"
 	"encoding/binary"
 	"errors"
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 	"net"
 )
 
