@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"hash/crc32"
 	"net"
 )
 
@@ -31,6 +32,7 @@ var (
 	LayerTypeCapwapData          = gopacket.RegisterLayerType(504, gopacket.LayerTypeMetadata{"CapwapData", gopacket.DecodeFunc(decodeCapwapData)})
 	LayerTypeCapwapControlHeader = gopacket.RegisterLayerType(505, gopacket.LayerTypeMetadata{"CapwapControlHeader", gopacket.DecodeFunc(decodeCapwapControlHeader)})
 	LayerTypeCapwapDataKeepAlive = gopacket.RegisterLayerType(506, gopacket.LayerTypeMetadata{"CapwapDataKeepAlive", gopacket.DecodeFunc(decodeCapwapDataKeepAlive)})
+	LayerTypeDot11NoFCS          = gopacket.RegisterLayerType(507, gopacket.LayerTypeMetadata{"Dot11NoFCS", gopacket.DecodeFunc(decodeDot11NoFCS)})
 )
 
 func decodeMPLS(data []byte, p gopacket.PacketBuilder) error {
@@ -153,7 +155,7 @@ func (self Lwapp) NextLayerType() gopacket.LayerType {
 	if self.Flags.C() {
 		return LayerTypeLwappControl
 	}
-	return layers.LayerTypeDot11
+	return LayerTypeDot11NoFCS
 }
 
 func decodeLwapp(data []byte, p gopacket.PacketBuilder) error {
@@ -431,4 +433,43 @@ func decodeCapwapControlHeader(data []byte, p gopacket.PacketBuilder) error {
 		MsgElementLength: msgElementLength,
 	})
 	return p.NextDecoder(gopacket.LayerTypePayload)
+}
+
+type Dot11NoFCS struct {
+	layers.BaseLayer
+}
+
+func (self Dot11NoFCS) LayerType() gopacket.LayerType {
+	return LayerTypeDot11NoFCS
+}
+
+func (self Dot11NoFCS) NextLayerType() gopacket.LayerType {
+	return layers.LayerTypeDot11
+}
+
+func decodeDot11NoFCS(data []byte, p gopacket.PacketBuilder) error {
+	payload := make([]byte, len(data)+4)
+	copy(payload, data)
+	h := crc32.NewIEEE()
+	h.Write(data)
+	binary.LittleEndian.PutUint32(payload[len(data):], h.Sum32())
+	p.AddLayer(&Dot11NoFCS{
+		BaseLayer: layers.BaseLayer{
+			Payload: payload,
+		},
+	})
+	return p.NextDecoder(layers.LayerTypeDot11)
+}
+
+func (self Dot11NoFCS) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) error {
+	dot11 := append([]byte{}, b.Bytes()...)
+	if err := b.Clear(); err != nil {
+		return err
+	}
+	bytes, err := b.AppendBytes(len(dot11) - 4) // remove FCS
+	if err != nil {
+		return err
+	}
+	copy(bytes, dot11)
+	return nil
 }
