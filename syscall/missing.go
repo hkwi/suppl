@@ -1,8 +1,8 @@
 package syscall
 
 const (
-	IFF_LOWER_UP = 1<<16
-	IFF_DORMANT = 1<<17
+	IFF_LOWER_UP = 1 << 16
+	IFF_DORMANT  = 1 << 17
 )
 
 // htons(syscall.ETH_P_ALL)
