@@ -448,8 +448,7 @@ func (self Dot11NoFCS) NextLayerType() gopacket.LayerType {
 }
 
 func decodeDot11NoFCS(data []byte, p gopacket.PacketBuilder) error {
-	payload := make([]byte, len(data)+4)
-	copy(payload, data)
+	payload := append(data, 0, 0, 0, 0)
 	h := crc32.NewIEEE()
 	h.Write(data)
 	binary.LittleEndian.PutUint32(payload[len(data):], h.Sum32())
