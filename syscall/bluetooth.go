@@ -10,3 +10,13 @@ const (
 	BRPROTO_HIDP
 	BRPROTO_AVDTP
 )
+
+type HciDevReq struct {
+	DevId uint16
+	DevOpt uint32
+}
+
+type HciDevListReq struct {
+	DevNum uint16
+	DevReq []HciDevReq
+}
