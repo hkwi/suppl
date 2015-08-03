@@ -5,6 +5,10 @@ const (
 	IFF_DORMANT  = 1 << 17
 )
 
+const (
+	ARPHRD_6LOWPAN = 825
+)
+
 // htons(syscall.ETH_P_ALL)
 const ETH_P_ALL uint16 = 0x0300
 
