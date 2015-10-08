@@ -6,6 +6,7 @@ import (
 	"hash/crc32"
 )
 
+// returns valid dot11 frame without FCS
 func FetchDot11FromRadioTap(r *layers.RadioTap) []byte {
 	if r.Flags.BadFCS() {
 		return nil
@@ -38,6 +39,7 @@ func FetchDot11FromRadioTap(r *layers.RadioTap) []byte {
 		if binary.LittleEndian.Uint32(payload[len(payload)-4:]) != h.Sum32() {
 			return nil
 		}
+		return payload[:len(payload)-4]
 	}
 	return payload
 }
