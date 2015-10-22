@@ -33,13 +33,6 @@ func FetchDot11FromRadioTap(r *layers.RadioTap) []byte {
 			}
 		}
 	}
-	if r.Flags.FCS() {
-		h := crc32.NewIEEE()
-		h.Write(payload[:len(payload)-4])
-		if binary.LittleEndian.Uint32(payload[len(payload)-4:]) != h.Sum32() {
-			return nil
-		}
-		return payload[:len(payload)-4]
-	}
-	return payload
+	// current gopacket radiotap implementation makes payload dot11 WITH FCS
+	return payload[:len(payload)-4]
 }
