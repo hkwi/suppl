@@ -1,9 +1,7 @@
 package layers
 
 import (
-	"encoding/binary"
 	"github.com/google/gopacket/layers"
-	"hash/crc32"
 )
 
 // returns valid dot11 frame without FCS
